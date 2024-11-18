@@ -1,0 +1,64 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+android {
+    namespace 'com.sandriver.dynamicshell'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.sandriver.dynamicshell"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            keyAlias 'dsjks'
+            keyPassword '123456'
+            storeFile file('../dsjks.jks')
+            storePassword '123456'
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+        debug {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    aaptOptions {
+        File publicTxtFile = project.rootProject.file('public.txt')
+        if (publicTxtFile.exists()) {
+            project.logger.error "${publicTxtFile} exists, apply it."
+            aaptOptions.additionalParameters("--stable-ids", "${publicTxtFile}")
+        } else {
+            project.logger.error "${publicTxtFile} not exists, generate it."
+            aaptOptions.additionalParameters("--emit-ids", "${publicTxtFile}")
+        }
+    }
+}
+
+dependencies {
+    implementation(project(":loader"))
+    implementation libs.appcompat
+    implementation libs.material
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+}
